@@ -1,4 +1,5 @@
 import { ObjectId } from "bson"
+import { use } from "chai"
 
 let comments
 
@@ -13,18 +14,6 @@ export default class CommentsDAO {
       console.error(`Unable to establish collection handles in userDAO: ${e}`)
     }
   }
-
-  /**
-  Ticket: Create/Update Comments
-
-  For this ticket, you will need to implement the following two methods:
-
-  - addComment
-  - updateComment
-
-  You can find these methods below this docstring. Make sure to read the comments
-  to better understand the task.
-  */
 
   /**
    * Inserts a comment into the `comments` collection, with the following fields:
@@ -43,9 +32,13 @@ export default class CommentsDAO {
    */
   static async addComment(movieId, user, comment, date) {
     try {
-      // TODO Ticket: Create/Update Comments
-      // Construct the comment document to be inserted into MongoDB.
-      const commentDoc = { someField: "someValue" }
+      const commentDoc = {
+        name: user.name,
+        email: user.email, 
+        movie_id: ObjectId(movieId),
+        text: comment,
+        date: new Date()
+       }
 
       return await comments.insertOne(commentDoc)
     } catch (e) {
@@ -66,12 +59,9 @@ export default class CommentsDAO {
    */
   static async updateComment(commentId, userEmail, text, date) {
     try {
-      // TODO Ticket: Create/Update Comments
-      // Use the commentId and userEmail to select the proper comment, then
-      // update the "text" and "date" fields of the selected comment.
       const updateResponse = await comments.updateOne(
-        { someField: "someValue" },
-        { $set: { someOtherField: "someOtherValue" } },
+        { email: userEmail, _id: commentId },
+        { $set: { text: text, date: new Date(date) } },
       )
 
       return updateResponse
@@ -82,20 +72,10 @@ export default class CommentsDAO {
   }
 
   static async deleteComment(commentId, userEmail) {
-    /**
-    Ticket: Delete Comments
-
-    Implement the deleteOne() call in this method.
-
-    Ensure the delete operation is limited so only the user can delete their own
-    comments, but not anyone else's comments.
-    */
-
     try {
-      // TODO Ticket: Delete Comments
-      // Use the userEmail and commentId to delete the proper comment.
       const deleteResponse = await comments.deleteOne({
         _id: ObjectId(commentId),
+        email: userEmail
       })
 
       return deleteResponse
