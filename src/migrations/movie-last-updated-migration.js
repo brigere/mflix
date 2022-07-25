@@ -3,36 +3,24 @@ const ObjectId = require("mongodb").ObjectId
 const MongoError = require("mongodb").MongoError
 require("dotenv").config()
 
-/**
- * Ticket: Migration
- *
- * Update all the documents in the `movies` collection, such that the
- * "lastupdated" field is stored as an ISODate() rather than a string.
- *
- * The Date.parse() method build into Javascript will prove very useful here!
- * Refer to http://mongodb.github.io/node-mongodb-native/3.1/tutorials/crud/#bulkwrite
- */
-
-// This leading semicolon (;) is to signify to the parser that this is a new expression. This expression is an
-// Immediately Invoked Function Expression (IIFE). It's being used to wrap this logic in an asynchronous function
-// so we can use await within.
-// To read more about this type of expression, refer to https://developer.mozilla.org/en-US/docs/Glossary/IIFE
 ;(async () => {
   try {
     const host = process.env.MFLIX_DB_URI
-    const client = await MongoClient.connect(host, { useNewUrlParser: true })
-    const mflix = client.db(process.env.MFLIX_NS)
+    const client = await MongoClient.connect(
+      host,
+      {
+        useNewUrlParser: true,
+        poolSize: 50,
+        wtimeout: 2500 
+      },
+    )
+    const mflix = client.db('sample_mflix')
 
-    // TODO: Create the proper predicate and projection
-    // add a predicate that checks that the `lastupdated` field exists, and then
-    // check that its type is a string
-    // a projection is not required, but may help reduce the amount of data sent
-    // over the wire!
-    const predicate = { somefield: { $someOperator: true } }
-    const projection = {}
+    console.log('\x1b[1m', 'Databsase connected!!!')
+
     const cursor = await mflix
       .collection("movies")
-      .find(predicate, projection)
+      .find({})
       .toArray()
     const moviesToMigrate = cursor.map(({ _id, lastupdated }) => ({
       updateOne: {
@@ -42,12 +30,13 @@ require("dotenv").config()
         },
       },
     }))
+    
     console.log(
-      "\x1b[32m",
+      "\x1b[35m",
       `Found ${moviesToMigrate.length} documents to update`,
     )
-    // TODO: Complete the BulkWrite statement below
-    const { modifiedCount } = await "some bulk operation"
+    
+    const { modifiedCount } = await mflix.collection('movies').bulkWrite(moviesToMigrate)
 
     console.log("\x1b[32m", `${modifiedCount} documents updated`)
     client.close()
