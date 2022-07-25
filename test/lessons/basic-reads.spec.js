@@ -40,7 +40,6 @@ describe("Basic Reads", () => {
     // be Roadracers. Let's check the title, year, and cast.
 
     let { title, year, cast } = result
-    console.log(result)
 
     // we expect a title of Roadracers, the year would be 1994, and the cast
     // includes Salma Hayek and David Arquette
