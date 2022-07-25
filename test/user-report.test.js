@@ -15,7 +15,7 @@ describe("User Report", () => {
     const topCommenter = userReport[0]
     expect(topCommenter).toEqual({
       _id: "roger_ashton-griffiths@gameofthron.es",
-      count: 277,
+      count: 331,
     })
   })
 })
